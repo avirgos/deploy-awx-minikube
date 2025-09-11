@@ -94,7 +94,6 @@ function clone_awx_operator_repo() {
     fi
 }
 
-
 ######################################################################
 # Deploys AWX using the operator and manifest.
 #
@@ -165,7 +164,6 @@ function wait_for_awx_readiness() {
     echo "✅ AWX is ready (\`awx-web\` and \`awx-task\` are available)."
 }
 
-
 ######################################################################
 # Starts port forwarding to access AWX locally.
 #
@@ -188,17 +186,35 @@ function start_port_forwarding() {
 }
 
 ######################################################################
+# Retrieves the `admin` password from the Ansible AWX secret.
+#
+# Globals:
+#   NAMESPACE
+# Locals:
+#   secret_username_admin, admin_password
+# Returns:
+#   None 
+######################################################################
+function retrieve_admin_password() {
+    local secret_username_admin=$(kubectl get secret -n "${NAMESPACE}" | grep -i password | cut -d ' ' -f1)
+    local admin_password=$(kubectl get secret "${secret_username_admin}" -o jsonpath="{.data.password}" -n "${NAMESPACE}" | base64 --decode)
+    
+    echo "🔒 \`admin\` password account: "${admin_password}""
+}
+
+######################################################################
 # Main program
 ######################################################################
 ensure_minikube_running
-clone_awx_operator_repo
 
 echo "• Checking if AWX is deployed..."
 if ! is_awx_deployed
 then
+    clone_awx_operator_repo
     deploy_awx
 else
     echo "✅ AWX is already deployed."
 fi
 
 start_port_forwarding
+retrieve_admin_password
