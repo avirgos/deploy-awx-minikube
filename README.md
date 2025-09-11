@@ -12,7 +12,7 @@ Bash script to deploy Ansible AWX using Minikube.
 
 ## Prerequisites
 
-The following packages are required :
+The following packages are required:
 
 - [`minikube`](https://minikube.sigs.k8s.io/docs/start/?arch=%2Flinux%2Fx86-64%2Fstable%2Fbinary+download)
 - [`kubectl`](https://kubernetes.io/docs/tasks/tools/install-kubectl-linux/#install-kubectl-binary-with-curl-on-linux)
@@ -21,7 +21,7 @@ The following packages are required :
 
 ## Usage
 
-Run the following Bash script :
+Run the following Bash script:
 
 ```bash
 ./deploy-awx-minikube.sh
@@ -35,7 +35,7 @@ Run the following Bash script :
 GIT_TAG="2.19.1"
 ```
 
-Also, in this script, you can modify these variables if necessary :
+Also, in this script, you can modify these variables if necessary:
 
 ```bash
 # path to the Ansible AWX manifest file used for deployment
