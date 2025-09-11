@@ -18,9 +18,13 @@ GIT_TAG="2.19.1"
 AWX_DIR=""${HOME}"/awx-operator"
 GIT_REPO_AWX_OPERATOR="https://github.com/ansible/awx-operator.git"
 AWX_TEMPLATE_FILE=""${AWX_DIR}"/awx-demo.yml"
+# path to the Ansible AWX manifest file used for deployment
 AWX_DEPLOY_FILE=""${AWX_DIR}"/awx.yml"
+# Minikube namespace where Ansible AWX will be deployed
 NAMESPACE="ansible-awx"
+# name of the Kubernetes service
 SERVICE="awx-service"
+# http://localhost:"${LOCAL_PORT}"
 LOCAL_PORT=8080
 REMOTE_PORT=80
 
@@ -171,11 +175,16 @@ function wait_for_awx_readiness() {
 #   None
 ######################################################################
 function start_port_forwarding() {
-    echo "• Forwarding port \""${LOCAL_PORT}"\" to AWX service in the background..."
-    
-    nohup kubectl port-forward svc/"${SERVICE}" "${LOCAL_PORT}":"${REMOTE_PORT}" -n "${NAMESPACE}" > /dev/null 2>&1 &
-    
-    echo "✅ Port-forward started. AWX should be accessible at \"http://localhost:"${LOCAL_PORT}"\""
+    echo "• Checking if port forwarding is already running..."
+
+    if pgrep -f "kubectl port-forward svc/"${SERVICE}" "${LOCAL_PORT}":"${REMOTE_PORT}" -n "${NAMESPACE}"" > /dev/null
+    then
+        echo "✅ Port forwarding is already running. AWX should be accessible at \"http://localhost:${LOCAL_PORT}\""
+    else
+        echo "• Starting port forwarding..."
+        nohup kubectl port-forward svc/"${SERVICE}" "${LOCAL_PORT}":"${REMOTE_PORT}" -n "${NAMESPACE}" > /dev/null 2>&1 &
+        echo "✅ Port forward started. AWX should be accessible at \"http://localhost:${LOCAL_PORT}\""
+    fi
 }
 
 ######################################################################
