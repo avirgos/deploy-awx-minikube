@@ -30,7 +30,7 @@ Run the following Bash script:
 
 ## Configuration
 
-⚠️  To deploy Ansible AWX, the script uses [`awx-operator` Git repository](https://github.com/ansible/awx-operator/releases) and `latest` version must be defined ⚠️:
+To deploy Ansible AWX, the script uses [`awx-operator` Git repository](https://github.com/ansible/awx-operator/releases) and `latest` version is already defined (*9/15/2025*):
 
 ```bash
 GIT_TAG="2.19.1"

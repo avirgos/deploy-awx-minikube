@@ -199,7 +199,7 @@ function retrieve_admin_password() {
     local secret_username_admin=$(kubectl get secret -n "${NAMESPACE}" | grep -i password | cut -d ' ' -f1)
     local admin_password=$(kubectl get secret "${secret_username_admin}" -o jsonpath="{.data.password}" -n "${NAMESPACE}" | base64 --decode)
     
-    echo "🔒 \`admin\` password account: "${admin_password}""
+    echo "🔒 \`admin\` DEFAULT password account: "${admin_password}""
 }
 
 ######################################################################
