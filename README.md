@@ -9,7 +9,7 @@ Bash script to deploy Ansible AWX using Minikube.
 - **Continuous display** of the deployment process
 - **Port forwarding** to use Ansible AWX locally
 - If Ansible AWX is already deployed and port forwarding is not running, **only** port forwarding is started
-- **`admin` password displayed** to connect to Ansible AWX dashboard
+- Initial **`admin` password displayed** to connect to Ansible AWX dashboard
 
 ## Prerequisites
 
