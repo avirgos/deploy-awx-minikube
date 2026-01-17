@@ -39,12 +39,12 @@ GIT_TAG="2.19.1"
 Also, in this script, you can modify these variables if necessary:
 
 ```bash
-# path to the Ansible AWX manifest file used for deployment
+# Path to the AWX demo template
 AWX_DEPLOY_FILE=""${AWX_DIR}"/awx.yml"
 # Minikube namespace where Ansible AWX will be deployed
 NAMESPACE="ansible-awx"
-# name of the Kubernetes service
+# Kubernetes service name
 SERVICE="awx-service"
-# http://localhost:"${LOCAL_PORT}"
+# Local and remote ports
 LOCAL_PORT=8080
 ```

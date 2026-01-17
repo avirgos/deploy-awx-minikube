@@ -9,22 +9,30 @@ set -o nounset  # Exit if variable not set.
 IFS=$'\n\t'     # Remove the initial space and instead use '\n'.
 
 ######################################################################
-# Global variables
+# Global variables (user-modifiable)
 ######################################################################
-# To be modified by user #
-##########################
+# Version of AWX operator to deploy
 GIT_TAG="2.19.1"
-##########################
+
+######################################################################
+# Global variables (internal) 
+######################################################################
 AWX_DIR=""${HOME}"/awx-operator"
 GIT_REPO_AWX_OPERATOR="https://github.com/ansible/awx-operator.git"
+
+# Path to the AWX demo template
 AWX_TEMPLATE_FILE=""${AWX_DIR}"/awx-demo.yml"
-# path to the Ansible AWX manifest file used for deployment
+
+# Path to the Ansible AWX manifest file used for deployment
 AWX_DEPLOY_FILE=""${AWX_DIR}"/awx.yml"
+
 # Minikube namespace where Ansible AWX will be deployed
 NAMESPACE="ansible-awx"
-# name of the Kubernetes service
+
+# Kubernetes service name
 SERVICE="awx-service"
-# http://localhost:"${LOCAL_PORT}"
+
+# Local and remote ports
 LOCAL_PORT=8080
 REMOTE_PORT=80
 
