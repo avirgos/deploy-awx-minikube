@@ -41,10 +41,13 @@ Also, in this script, you can modify these variables if necessary:
 ```bash
 # Path to the AWX demo template
 AWX_DEPLOY_FILE=""${AWX_DIR}"/awx.yml"
+
 # Minikube namespace where Ansible AWX will be deployed
 NAMESPACE="ansible-awx"
+
 # Kubernetes service name
 SERVICE="awx-service"
+
 # Local and remote ports
 LOCAL_PORT=8080
 ```
