@@ -120,7 +120,7 @@ function deploy_awx() {
     echo "• Creating namespace if it doesn't exist..."
     kubectl create namespace "${NAMESPACE}" --dry-run=client -o yaml | kubectl apply -f -
   
-    echo "• Setting \`NAMESPACE=\""${NAMESPACE}"\"\`"
+    echo "• Setting NAMESPACE=\""${NAMESPACE}"\""
     export NAMESPACE="${NAMESPACE}"
   
     echo "• Deploying AWX Operator..."
