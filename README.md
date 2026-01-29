@@ -20,14 +20,6 @@ The following packages are required:
 - `git`
 - `make`
 
-## Usage
-
-Run the following Bash script:
-
-```bash
-./deploy-awx-minikube.sh
-```
-
 ## Configuration
 
 To deploy Ansible AWX, the script uses [`awx-operator` Git repository](https://github.com/ansible/awx-operator/releases) and `latest` version is already defined (*9/15/2025*):
@@ -50,4 +42,12 @@ SERVICE="awx-service"
 
 # Local and remote ports
 LOCAL_PORT=8080
+```
+
+## Usage
+
+Run the following Bash script:
+
+```bash
+./deploy-awx-minikube.sh
 ```
