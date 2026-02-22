@@ -8,6 +8,17 @@ set -o pipefail # Exit if pipe failed.
 set -o nounset  # Exit if variable not set.
 IFS=$'\n\t'     # Remove the initial space and instead use '\n'.
 
+RESET="\033[0m"
+GREEN="\033[0;32m"
+YELLOW="\033[1;33m"
+RED="\033[0;31m"
+BLUE="\033[0;34m"
+
+function log_info() { echo -e ""${BLUE}"[INFO]"${RESET}" "${1}""; }
+function log_ok()   { echo -e ""${GREEN}"[OK]"${RESET}" "${1}""; }
+function log_warn() { echo -e ""${YELLOW}"[WARN]"${RESET}" "${1}""; }
+function log_err()  { echo -e ""${RED}"[ERR]"${RESET}" "${1}""; }
+
 ######################################################################
 # Global variables (user-modifiable)
 ######################################################################
@@ -15,7 +26,7 @@ IFS=$'\n\t'     # Remove the initial space and instead use '\n'.
 GIT_TAG="2.19.1"
 
 ######################################################################
-# Global variables (internal) 
+# Global variables (internal)
 ######################################################################
 AWX_DIR=""${HOME}"/awx-operator"
 GIT_REPO_AWX_OPERATOR="https://github.com/ansible/awx-operator.git"
@@ -64,7 +75,6 @@ function is_awx_deployed() {
     return 1
 }
 
-
 ######################################################################
 # Starts Minikube if not already running.
 #
@@ -72,14 +82,15 @@ function is_awx_deployed() {
 #   None
 ######################################################################
 function ensure_minikube_running() {
-    echo "• Checking Minikube status..."  
-    
+    log_info "Checking Minikube status..."
+
     if ! minikube status | grep -q "Running"
     then
-        echo "• Minikube is not running. Starting it..."
+        log_warn "Minikube is not running. Starting it..."
         minikube start --driver=docker
+        log_ok "Minikube started."
     else
-        echo "✅ Minikube is already running."
+        log_ok "Minikube is already running."
     fi
 }
 
@@ -92,13 +103,16 @@ function ensure_minikube_running() {
 #   None
 ######################################################################
 function clone_awx_operator_repo() {
-    echo "• Checking if AWX Operator repository is cloned..."
-    
+    log_info "Checking if AWX Operator repository is cloned..."
+
     if [ ! -d "${AWX_DIR}" ]
     then
-        echo "❌ AWX Operator directory not found at \""${AWX_DIR}"\""
-        echo "• Cloning AWX Operator repository..."
+        log_warn "AWX Operator directory not found at '${AWX_DIR}'"
+        log_info "Cloning AWX Operator repository..."
         git clone "${GIT_REPO_AWX_OPERATOR}" "${AWX_DIR}"
+        log_ok "Repository cloned."
+    else
+        log_ok "Repository already present."
     fi
 }
 
@@ -111,26 +125,26 @@ function clone_awx_operator_repo() {
 #   None
 ######################################################################
 function deploy_awx() {
-    echo "❌ AWX is not deployed. Starting deployment..."
-    
-    echo "• Switching to AWX Operator version \""${GIT_TAG}"\"..."
+    log_warn "AWX is not deployed. Starting deployment..."
+
+    log_info "Switching to AWX Operator version '${GIT_TAG}'..."
     cd "${AWX_DIR}"
     git checkout "${GIT_TAG}"
 
-    echo "• Creating namespace if it doesn't exist..."
+    log_info "Creating namespace if it doesn't exist..."
     kubectl create namespace "${NAMESPACE}" --dry-run=client -o yaml | kubectl apply -f -
-  
-    echo "• Setting NAMESPACE=\""${NAMESPACE}"\""
+    log_ok "Namespace ensured."
+
     export NAMESPACE="${NAMESPACE}"
-  
-    echo "• Deploying AWX Operator..."
+
+    log_info "Deploying AWX Operator..."
     make deploy
- 
-    echo "• Preparing AWX manifest..."
+
+    log_info "Preparing AWX manifest..."
     cp "${AWX_TEMPLATE_FILE}" "${AWX_DEPLOY_FILE}"
     sed -i 's/awx-demo/awx/g' "${AWX_DEPLOY_FILE}"
 
-    echo "• Applying AWX manifest..."
+    log_info "Applying AWX manifest..."
     kubectl apply -f "${AWX_DEPLOY_FILE}" -n "${NAMESPACE}"
 
     wait_for_awx_readiness
@@ -147,9 +161,9 @@ function deploy_awx() {
 #   None
 ######################################################################
 function wait_for_awx_readiness() {
-    echo -e "ℹ️ Checking AWX component readiness... (max. 10 minutes)\n"
-  
-    local max_wait=600  # 10 minutes
+    log_info "Checking AWX component readiness (max. 10 minutes)..."
+
+    local max_wait=600
     local interval=60
     local elapsed=0
 
@@ -157,19 +171,18 @@ function wait_for_awx_readiness() {
     do
         if [ "${elapsed}" -ge "${max_wait}" ]
         then
-            echo "⚠️  AWX is not ready after 10 minutes. Port-forwarding aborted."
+            log_err "AWX is not ready after 10 minutes. Aborting."
             exit 1
         fi
 
-        echo "• AWX not ready yet. Retrying in "${interval}"s..."
+        log_warn "AWX not ready yet. Retrying in ${interval}s..."
         kubectl get deployment -n "${NAMESPACE}"
         sleep "${interval}"
         elapsed=$((elapsed + interval))
     done
-    
-    sleep 120   # synchronization delay
-    
-    echo "✅ AWX is ready (\`awx-web\` and \`awx-task\` are available)."
+
+    sleep 120
+    log_ok "AWX is ready ('awx-web' and 'awx-task' available)."
 }
 
 ######################################################################
@@ -181,20 +194,20 @@ function wait_for_awx_readiness() {
 #   None
 ######################################################################
 function start_port_forwarding() {
-    echo "• Checking if port forwarding is already running..."
+    log_info "Checking if port forwarding is already running..."
 
-    if pgrep -f "kubectl port-forward svc/"${SERVICE}" "${LOCAL_PORT}":"${REMOTE_PORT}" -n "${NAMESPACE}"" > /dev/null
+    if pgrep -f "kubectl port-forward svc/${SERVICE} ${LOCAL_PORT}:${REMOTE_PORT} -n ${NAMESPACE}" > /dev/null
     then
-        echo "✅ Port forwarding is already running. AWX should be accessible at \"http://localhost:${LOCAL_PORT}\""
+        log_ok "Port forwarding already active. AWX available at 'http://localhost:${LOCAL_PORT}'"
     else
-        echo "• Starting port forwarding..."
-        nohup kubectl port-forward svc/"${SERVICE}" "${LOCAL_PORT}":"${REMOTE_PORT}" -n "${NAMESPACE}" > /dev/null 2>&1 &
-        echo "✅ Port forward started. AWX should be accessible at \"http://localhost:${LOCAL_PORT}\""
+        log_info "Starting port forwarding..."
+        nohup kubectl port-forward svc/"${SERVICE}" "${LOCAL_PORT}:${REMOTE_PORT}" -n "${NAMESPACE}" > /dev/null 2>&1 &
+        log_ok "Port forwarding started. AWX available at 'http://localhost:${LOCAL_PORT}'"
     fi
 }
 
 ######################################################################
-# Retrieves the `admin` password from the Ansible AWX secret.
+# Retrieves the 'admin' password from the Ansible AWX secret.
 #
 # Globals:
 #   NAMESPACE
@@ -204,10 +217,10 @@ function start_port_forwarding() {
 #   None 
 ######################################################################
 function retrieve_admin_password() {
-    local secret_username_admin=$(kubectl get secret -n "${NAMESPACE}" | grep -i password | cut -d ' ' -f1)
+    local secret_username_admin=$(kubectl get secret -n "${NAMESPACE}" | grep -i password | awk '{print $1}')
     local admin_password=$(kubectl get secret "${secret_username_admin}" -o jsonpath="{.data.password}" -n "${NAMESPACE}" | base64 --decode)
-    
-    echo "🔒 \`admin\` DEFAULT password account: "${admin_password}""
+
+    log_info "Admin default password: ${admin_password}"
 }
 
 ######################################################################
@@ -215,13 +228,13 @@ function retrieve_admin_password() {
 ######################################################################
 ensure_minikube_running
 
-echo "• Checking if AWX is deployed..."
+log_info "Checking if AWX is deployed..."
 if ! is_awx_deployed
 then
     clone_awx_operator_repo
     deploy_awx
 else
-    echo "✅ AWX is already deployed."
+    log_ok "AWX is already deployed."
 fi
 
 start_port_forwarding
