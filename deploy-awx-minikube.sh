@@ -88,7 +88,7 @@ function ensure_minikube_running() {
     then
         log_warn "Minikube is not running. Starting it..."
         minikube start --driver=docker
-        log_ok "Minikube started."
+        log_ok "Minikube started"
     else
         log_ok "Minikube is already running."
     fi
@@ -110,9 +110,9 @@ function clone_awx_operator_repo() {
         log_warn "AWX Operator directory not found at '${AWX_DIR}'"
         log_info "Cloning AWX Operator repository..."
         git clone "${GIT_REPO_AWX_OPERATOR}" "${AWX_DIR}"
-        log_ok "Repository cloned."
+        log_ok "Repository cloned"
     else
-        log_ok "Repository already present."
+        log_ok "Repository already present"
     fi
 }
 
@@ -133,7 +133,7 @@ function deploy_awx() {
 
     log_info "Creating namespace if it doesn't exist..."
     kubectl create namespace "${NAMESPACE}" --dry-run=client -o yaml | kubectl apply -f -
-    log_ok "Namespace ensured."
+    log_ok "Namespace ensured"
 
     export NAMESPACE="${NAMESPACE}"
 
@@ -171,7 +171,7 @@ function wait_for_awx_readiness() {
     do
         if [ "${elapsed}" -ge "${max_wait}" ]
         then
-            log_err "AWX is not ready after 10 minutes. Aborting."
+            log_err "AWX is not ready after 10 minutes. Aborting"
             exit 1
         fi
 
@@ -182,7 +182,7 @@ function wait_for_awx_readiness() {
     done
 
     sleep 120
-    log_ok "AWX is ready ('awx-web' and 'awx-task' available)."
+    log_ok "AWX is ready ('awx-web' and 'awx-task' available)"
 }
 
 ######################################################################
@@ -234,7 +234,7 @@ then
     clone_awx_operator_repo
     deploy_awx
 else
-    log_ok "AWX is already deployed."
+    log_ok "AWX is already deployed"
 fi
 
 start_port_forwarding
