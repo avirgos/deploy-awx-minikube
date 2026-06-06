@@ -16,8 +16,8 @@ BLUE="\033[0;34m"
 
 function log_info() { echo -e ""${BLUE}"[INFO]"${RESET}" "${1}""; }
 function log_ok()   { echo -e ""${GREEN}"[OK]"${RESET}" "${1}""; }
-function log_warn() { echo -e ""${YELLOW}"[WARN]"${RESET}" "${1}""; }
-function log_err()  { echo -e ""${RED}"[ERR]"${RESET}" "${1}""; }
+function log_warn() { echo -e ""${YELLOW}"[?]"${RESET}" "${1}""; }
+function log_err()  { echo -e ""${RED}"[!]"${RESET}" "${1}""; }
 
 ######################################################################
 # Global variables (user-modifiable)
